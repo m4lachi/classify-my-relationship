@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Love, Labeled – Red Flag Trainer</title>
+  <!-- Fonts -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Emilys+Candy&family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+  </style>
+
+  <!-- Chart.js for contribution chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* ===============================
+       Valentine’s Pastel Color Palette
+       =============================== */
+
+    :root {
+      --pink: #ffb3c6;
+      --pink-light: #ffd9e1;
+      --rose: #ff85a2;
+      --peach: #ffe5d9;
+      --lavender: #e7d7ff;
+      --purple: #c2afff;
+      --text-dark: #5a375f;
+      --white: #ffffff;
+    }
+
+    /* ===============================
+       Background / Hearts Animation
+       =============================== */
+
+    body {
+      font-family: "Montserrat Alternates", sans-serif;
+      background: linear-gradient(180deg, #ffe5ec, #ffd6ea, #f9eaff);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+      position: relative;
+      color: var(--text-dark);
+    }
+
+    /* Floating hearts */
+    .heart {
+      position: absolute;
+      color: #ff8fab;
+      opacity: 0.4;
+      animation: float 6s infinite ease-in-out;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+      50% { transform: translateY(-40px) rotate(15deg); opacity: 0.8; }
+      100% { transform: translateY(0) rotate(0deg); opacity: 0.4; }
+    }
+
+    /* Sparkles overlay */
+    .sparkles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .sparkle {
+      position: absolute;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      text-shadow: 0 0 8px rgba(255, 182, 193, 0.9);
+      animation: sparkleFloat 4s infinite ease-in-out;
+    }
+
+    .sparkle.s1 { top: 12%; left: 12%; animation-delay: 0s; }
+    .sparkle.s2 { top: 25%; right: 18%; animation-delay: 0.8s; }
+    .sparkle.s3 { bottom: 18%; left: 20%; animation-delay: 1.5s; }
+    .sparkle.s4 { bottom: 28%; right: 10%; animation-delay: 2.2s; }
+
+    @keyframes sparkleFloat {
+      0% { transform: translateY(0) scale(0.9); opacity: 0; }
+      20% { opacity: 1; }
+      50% { transform: translateY(-12px) scale(1.1); opacity: 1; }
+      80% { opacity: 0.7; }
+      100% { transform: translateY(0) scale(0.9); opacity: 0; }
+    }
+
+    /* ===============================
+       Game Container
+       =============================== */
+
+    .game-shell {
+      width: min(900px, 95vw);
+      background: var(--white);
+      border-radius: 22px;
+      padding: 28px 32px;
+      border: 3px solid var(--pink);
+      box-shadow: 0 0 25px rgba(255, 182, 193, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.65) 0%,
+        rgba(255, 255, 255, 0.15) 40%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      mix-blend-mode: screen;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+      margin-bottom: 12px;
+      color: var(--rose);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .game-title {
+      font-family: 'Emilys Candy', cursive;
+      color: var(--rose);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .progress {
+      color: var(--purple);
+    }
+
+    /* ===============================
+       Question Box
+       =============================== */
+
+    .question-box {
+      font-family: "Montserrat Alternates", sans-serif;
+      background: var(--pink-light);
+      border-radius: 14px;
+      padding: 22px;
+      border: 2px solid var(--lavender);
+      margin-top: 10px;
+      box-shadow:
+        0 8px 20px rgba(255, 182, 193, 0.45),
+        inset 0 0 18px rgba(255, 182, 193, 0.4);
+    }
+
+    .question-label {
+      font-family: "Montserrat Alternates", sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      color: var(--purple);
+      margin-bottom: 5px;
+      letter-spacing: 1.5px;
+      font-weight: 600;
+    }
+
+    .question-text {
+      font-family: "Montserrat Alternates", sans-serif;
+      font-size: 22px;
+      color: var(--text-dark);
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    /* ===============================
+       Buttons
+       =============================== */
+
+    .button-row {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .flag-btn {
+      padding: 14px 22px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      min-width: 180px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+      transform-origin: center;
+    }
+
+    /* cute wobble on hover */
+    .flag-btn:hover {
+      animation: wobble 0.35s ease;
+    }
+
+    @keyframes wobble {
+      0% { transform: translateY(0) rotate(0deg); }
+      30% { transform: translateY(-2px) rotate(-2deg); }
+      60% { transform: translateY(-2px) rotate(2deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+
+    .flag-btn.red {
+      background: #ff8fa3;
+      color: white;
+    }
+
+    .flag-btn.red:hover {
+      background: #ff6f89;
+      transform: translateY(-2px);
+    }
+
+    .flag-btn.green {
+      background: #b6e3b0;
+      color: #1f3d1f;
+    }
+
+    .flag-btn.green:hover {
+      background: #9cd89b;
+      transform: translateY(-2px);
+    }
+
+    /* ===============================
+       Status Bar
+       =============================== */
+
+    .status-bar {
+      margin-top: 16px;
+      font-size: 14px;
+      text-align: center;
+      color: var(--text-dark);
+      font-style: italic;
+    }
+
+    /* ===============================
+       Final Step
+       =============================== */
+
+    .final-step {
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 2px dashed var(--lavender);
+    }
+
+    .final-step label {
+      font-family: "Montserrat Alternates", sans-serif;
+      font-size: 15px;
+      margin-bottom: 10px;
+      color: var(--rose);
+      font-weight: 600;
+      display: block;
+    }
+
+    .final-step input {
+      font-family: "Montserrat Alternates", sans-serif;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 2px solid var(--pink);
+      background: var(--peach);
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+
+    .final-step button {
+      margin-top: 14px;
+      padding: 12px 18px;
+      border-radius: 999px;
+      border: none;
+      background: var(--purple);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(194, 175, 255, 0.6);
+      transition: 0.2s;
+    }
+
+    .final-step button:hover {
+      background: #b39aff;
+      transform: translateY(-2px);
+    }
+
+    .prediction-result {
+      margin-top: 14px;
+      font-size: 17px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .prediction-result .red {
+      color: #ff5f7e;
+    }
+
+    .prediction-result .green {
+      color: #4caf50;
+    }
+
+    /* ===============================
+       Chart styling
+       =============================== */
+
+
+     #contribChart {
+        width: 100% !important;
+        height: 180px !important;
+      }
+  
+    .chart-container {
+      margin-top: 18px;
+      padding: 12px;
+      border-radius: 16px;
+      background: #ffe5ec;
+      border: 1px solid #ffc2d1;
+      box-shadow: 0 4px 12px rgba(255, 182, 193, 0.4);
+      min-height: 210px; 
+      overflow: hidden;
+    }
+
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--rose);
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .chart-container canvas {
+      max-width: 100%;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* ===============================
+       Helpers
+       =============================== */
+
+    .hidden {
+      display: none;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Floating hearts -->
+  <div class="heart" style="top:10%; left: 5%; font-size: 34px;">❤</div>
+  <div class="heart" style="top:20%; right: 10%; font-size: 28px;">💗</div>
+  <div class="heart" style="top:75%; left: 12%; font-size: 40px;">💓</div>
+  <div class="heart" style="top:60%; right: 15%; font-size: 32px;">💕</div>
+
+  <div class="game-shell">
+    <div class="sparkles">
+      <span class="sparkle s1">✦</span>
+      <span class="sparkle s2">✧</span>
+      <span class="sparkle s3">✦</span>
+      <span class="sparkle s4">✧</span>
+    </div>
+    
+    <div class="game-header">
+      <div class="game-title">Love, Labeled ♥ Flag Trainer</div>
+      <div class="progress" id="progressText">Question 1 of 25</div>
+    </div>
+
+    <div class="question-box">
+      <div class="question-label">Trait</div>
+      <div class="question-text" id="questionText"></div>
+    </div>
+
+    <div class="button-row" id="flagButtons">
+      <button class="flag-btn red" onclick="selectFlag('red')">🚩 Red Flag</button>
+      <button class="flag-btn green" onclick="selectFlag('green')">💚 Green Flag</button>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+      Pick the vibe! Is this a red flag or green flag? 💘
+    </div>
+
+    <div class="final-step hidden" id="finalStep">
+      <label for="userTrait">
+        Now write your own relationship trait:
+      </label>
+      <input id="userTrait" type="text" placeholder="e.g. They always encourage my dreams " />
+      <button onclick="submitToModel()">Ask the Bot 💌</button>
+
+      <div class="prediction-result" id="predictionResult"></div>
+
+      <!-- NEW: contribution chart area -->
+      <div class="chart-container hidden" id="chartContainer">
+        <div class="chart-title">
+          Why the model thinks this 💭 (word influence for 🚩 / 💚)
+        </div>
+        
+        <canvas id="contribChart" ></canvas>
+      
+         <div id="chartFallback"
+            style="font-size:12px; text-align:center; margin-top:6px; color:#a85574;">
+          (If no bars appear, the model couldn't match any words from your trait to its vocabulary.)
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // 25 example traits – customize these with your own mix of funny + serious
+    const TRAITS = [
+      "They listen when you talk about your day",
+      "They make fun of your interests in front of others",
+      "They respect your boundaries when you say no",
+      "They read your messages but never reply",
+      "They celebrate your wins, even small ones",
+      "They get angry when you spend time with friends",
+      "They ask for your opinion before making big decisions",
+      "They pressure you to share passwords",
+      "They check in on your mental health",
+      "They ignore you when they’re upset instead of talking",
+      "They remember important dates and events",
+      "They mock your career or major",
+      "They support your goals even if it means less time together",
+      "They constantly compare you to other people",
+      "They apologize and change behavior after conflicts",
+      "They call you names during arguments",
+      "They encourage your independence",
+      "They threaten to leave during every disagreement",
+      "They are honest about their feelings",
+      "They stalk your location or social media activity",
+      "They talk respectfully about exes",
+      "They invalidate your feelings",
+      "They include you when making future plans",
+      "They use the silent treatment as punishment",
+      "They are happy when you grow and change"
+    ];
+
+    const TOTAL_QUESTIONS = TRAITS.length; // 25
+    let currentIndex = 0;
+    const answers = [];
+
+    const questionTextEl = document.getElementById("questionText");
+    const progressTextEl = document.getElementById("progressText");
+    const statusBarEl = document.getElementById("statusBar");
+    const finalStepEl = document.getElementById("finalStep");
+    const predictionResultEl = document.getElementById("predictionResult");
+    const flagButtonsEl = document.getElementById("flagButtons");
+    const chartContainerEl = document.getElementById("chartContainer");
+    const contribCanvas = document.getElementById("contribChart");
+
+    let contribChart = null;
+
+    function showCurrentQuestion() {
+      questionTextEl.textContent = TRAITS[currentIndex];
+      progressTextEl.textContent = `Question ${currentIndex + 1} of ${TOTAL_QUESTIONS}`;
+      statusBarEl.textContent = "Select whether this is a red flag or green flag ✨";
+    }
+
+    function selectFlag(label) {
+      const trait = TRAITS[currentIndex];
+
+      answers.push({
+        text: trait,
+        label: label   // "red" or "green"
+      });
+
+      currentIndex++;
+
+      if (currentIndex < TOTAL_QUESTIONS) {
+        showCurrentQuestion();
+      } else {
+        // All questions answered – move to final step
+        flagButtonsEl.classList.add("hidden");
+        statusBarEl.textContent = "Nice! You've trained the model on your standards 🧠💘";
+        finalStepEl.classList.remove("hidden");
+      }
+    }
+
+    async function submitToModel() {
+      const userTraitInput = document.getElementById("userTrait");
+      const userTrait = userTraitInput.value.trim();
+      if (!userTrait) {
+        predictionResultEl.textContent = "Please type a trait first 🙂";
+        chartContainerEl.classList.add("hidden");
+        return;
+      }
+
+      predictionResultEl.textContent = "Thinking like an over-analytical friend… 🤖";
+      chartContainerEl.classList.add("hidden");
+
+      try {
+        const res = await fetch("/train_and_predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            answers: answers,
+            user_trait: userTrait
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          predictionResultEl.textContent = "Error: " + data.error;
+          chartContainerEl.classList.add("hidden");
+          return;
+        }
+
+        const prediction = data.prediction; // "red" or "green"
+        const probs = data.probabilities || {};
+        const contributions = data.contributions || {};
+
+        let msg;
+        if (prediction === "red") {
+          msg = `<span class="red">🚩 The bot thinks this is a RED FLAG.</span>`;
+        } else {
+          msg = `<span class="green">✅ The bot thinks this is a GREEN FLAG.</span>`;
+        }
+
+        if (probs && typeof probs[prediction] === "number") {
+          const pct = Math.round(probs[prediction] * 100);
+          msg += ` <br><br>Confidence: ${pct}% based on how you labeled the earlier traits.`;
+        }
+
+        predictionResultEl.innerHTML = msg;
+
+        // Build contribution chart if we have word-level info
+        console.log("Contributions from server:", contributions);
+
+        const labels = Object.keys(contributions || {});
+        if (labels.length > 0) {
+          const redWeights = labels.map(w => Math.abs((contributions[w].red ?? 0)));
+          const greenWeights = labels.map(w => Math.abs((contributions[w].green ?? 0)));
+
+          // Show container
+          chartContainerEl.classList.remove("hidden");
+          document.getElementById("chartFallback").style.display = "none";
+
+          // Destroy old chart if it exists
+          if (contribChart) {
+            contribChart.destroy();
+          }
+
+          const ctx = contribCanvas.getContext("2d");
+
+          contribChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: "Red Flag Influence 🚩",
+                  data: redWeights,
+                  backgroundColor: "rgba(255, 111, 137, 0.85)"
+                },
+                {
+                  label: "Green Flag Influence 💚",
+                  data: greenWeights,
+                  backgroundColor: "rgba(156, 216, 155, 0.95)"
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false, // ⬅ use our fixed height
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: {
+                    callback: function(value) {
+                      return Number(value).toFixed(2);
+                    }
+                  },
+                  title: {
+                    display: true,
+                    text: "Influence (higher = stronger effect)"
+                  }
+                },
+                x: {
+                  title: {
+                    display: true,
+                    text: "Words from your trait"
+                  }
+                }
+              },
+              plugins: {
+                legend: {
+                  labels: {
+                    font: {
+                      family: "Montserrat Alternates"
+                    }
+                  }
+                }
+              }
+            }
+          });
+
+        } else {
+          // No contributions for these words
+          chartContainerEl.classList.remove("hidden");
+          document.getElementById("chartFallback").style.display = "block";
+          if (contribChart) {
+            contribChart.destroy();
+            contribChart = null;
+          }
+        }
+
+
+      } catch (err) {
+        console.error(err);
+        predictionResultEl.textContent = "Something went wrong talking to the model 😭";
+        chartContainerEl.classList.add("hidden");
+      }
+    }
+
+    // Initialize first question
+    showCurrentQuestion();
+  </script>
+</body>
+</html>
