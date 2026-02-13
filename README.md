@@ -1,4 +1,4 @@
-# 💘 Claasify My Relationship
+# 💘 Classify My Relationship
 
 *A Valentine’s Machine Learning Workshop Project*
 
